@@ -23,7 +23,6 @@ primary_region = 'arn'
 
   [[services.ports]]
     port = 1935
-    handlers = ["proxy_proto"]
 
 [[vm]]
   memory = '1gb'
