@@ -1,9 +1,9 @@
-# fly.toml app configuration file generated for rtmp-fer0-a on 2025-05-30T09:07:19Z
+# fly.toml app configuration file generated for rtmp-relay on 2025-05-30T09:12:16Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
 
-app = 'rtmp-fer0-a'
+app = 'rtmp-relay'
 primary_region = 'arn'
 
 [build]
