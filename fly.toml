@@ -9,12 +9,21 @@ primary_region = 'arn'
 [build]
 
 [http_service]
-  internal_port = 3000
+  internal_port = 8080
   force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
   min_machines_running = 0
   processes = ['app']
+
+[[services]]
+  protocol = "tcp"
+  internal_port = 1935
+  processes = ["app"]
+
+  [[services.ports]]
+    port = 1935
+    handlers = ["proxy_proto"]
 
 [[vm]]
   memory = '1gb'
