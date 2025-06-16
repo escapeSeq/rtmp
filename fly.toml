@@ -21,28 +21,13 @@ primary_region = 'arn'
   internal_port = 8080
   protocol = "tcp"
 
-  [[services.ports]]
-    handlers = ["http"]
-    port = "80"
-
-  [[services.ports]]
-    handlers = ["tls", "http"]
-    port = "443"
-
 [[services]]
   internal_port = 1935
   protocol = "tcp"
 
   [[services.ports]]
-    port = "1935"
-
-[[services]]
-  internal_port = 1936
-  protocol = "tcp"
-
-  [[services.ports]]
     handlers = ["tls"]
-    port = "1936"
+    port = "1935"
 
 [[vm]]
   memory = '1gb'
