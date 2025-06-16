@@ -2,7 +2,7 @@ const NodeMediaServer = require('node-media-server');
 
 const config = {
   rtmp: {
-    port: 1935,
+    port: 1936,
     chunk_size: 60000,
     gop_cache: true,
     ping: 30,
@@ -24,7 +24,8 @@ const config = {
     play: false,
     publish: false
   },
-  logType: 3
+  logType: 3,
+  host: '0.0.0.0'
 };
 
 // Create server instance
@@ -123,8 +124,10 @@ nms.on('donePlay', (id, StreamPath, args) => {
 // Start the server
 nms.run();
 
-// Log initial configuration
+// Log initial configuration and listening addresses
 console.log('Server started with configuration:', JSON.stringify(config, null, 2));
+console.log(`RTMP server listening on 0.0.0.0:${config.rtmp.port}`);
+console.log(`HTTP server listening on 0.0.0.0:${config.http.port}`);
 console.log('Waiting for streams...');
 
 // Periodically log stream status
