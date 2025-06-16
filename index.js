@@ -3,7 +3,7 @@ const version = '1.0.0'; // Define version if it's not imported
 const NodeMediaServer = require('node-media-server');
 
 const config = {
-  logType: 3,                    // only errors & warnings
+  logType: 3,                    // Set to debug level to help diagnose issues
   rtmp: {
     port: 1935,
     chunk_size: 60000,
@@ -32,5 +32,31 @@ const config = {
   }
 };
 
+// Create server instance
 const nms = new NodeMediaServer(config);
-nms.run(); 
+
+// Add event handlers for better error tracking
+nms.on('preConnect', (id, args) => {
+  console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
+});
+
+nms.on('postConnect', (id, args) => {
+  console.log('[NodeEvent on postConnect]', `id=${id} args=${JSON.stringify(args)}`);
+});
+
+nms.on('doneConnect', (id, args) => {
+  console.log('[NodeEvent on doneConnect]', `id=${id} args=${JSON.stringify(args)}`);
+});
+
+nms.on('prePublish', (id, StreamPath, args) => {
+  console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+});
+
+// Start the server
+nms.run();
+
+// Export version and server instance if needed
+module.exports = {
+  version,
+  nms
+}; 
