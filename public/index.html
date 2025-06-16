@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RTMP Stream Status</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        .stream-list {
+            margin-top: 20px;
+        }
+        .stream-item {
+            padding: 10px;
+            border: 1px solid #ddd;
+            margin-bottom: 10px;
+            border-radius: 4px;
+        }
+        .stream-item.active {
+            border-color: #4CAF50;
+            background-color: #E8F5E9;
+        }
+        .no-streams {
+            color: #666;
+            font-style: italic;
+        }
+        .instructions {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #E3F2FD;
+            border-radius: 4px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>RTMP Stream Status</h1>
+        <div class="stream-list" id="streamList">
+            <p class="no-streams">Loading streams...</p>
+        </div>
+        <div class="instructions">
+            <h3>How to use:</h3>
+            <p>To publish a stream:</p>
+            <code>rtmp://[server-address]:1935/live/[stream-name]</code>
+            <p>To play a stream:</p>
+            <code>http://[server-address]:8080/live/[stream-name].flv</code>
+        </div>
+    </div>
+
+    <script>
+        function updateStreams() {
+            fetch('/api/streams')
+                .then(response => response.json())
+                .then(data => {
+                    const streamList = document.getElementById('streamList');
+                    streamList.innerHTML = '';
+                    
+                    const streams = data.live || {};
+                    const streamNames = Object.keys(streams);
+                    
+                    if (streamNames.length === 0) {
+                        streamList.innerHTML = '<p class="no-streams">No active streams</p>';
+                        return;
+                    }
+                    
+                    streamNames.forEach(name => {
+                        const stream = streams[name];
+                        const div = document.createElement('div');
+                        div.className = 'stream-item active';
+                        div.innerHTML = `
+                            <h3>${name}</h3>
+                            <p>Viewers: ${(stream.subscribers || []).length}</p>
+                            ${stream.publisher ? `
+                                <p>Publisher IP: ${stream.publisher.ip}</p>
+                                <p>Started: ${new Date(stream.publisher.connectCreated).toLocaleString()}</p>
+                            ` : '<p>No publisher connected</p>'}
+                        `;
+                        streamList.appendChild(div);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching streams:', error);
+                    document.getElementById('streamList').innerHTML = 
+                        '<p class="no-streams">Error loading streams</p>';
+                });
+        }
+
+        // Update every 5 seconds
+        setInterval(updateStreams, 5000);
+        updateStreams();
+    </script>
+</body>
+</html> 
