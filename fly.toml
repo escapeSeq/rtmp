@@ -1,4 +1,4 @@
-# fly.toml app configuration file generated for rtmp-relay on 2025-05-30T09:12:16Z
+# fly.toml app configuration file generated for rtmp-relay on 2025-06-16T15:55:13Z
 #
 # See https://fly.io/docs/reference/configuration/ for information about how to use this file.
 #
@@ -9,20 +9,12 @@ primary_region = 'arn'
 [build]
 
 [http_service]
-  internal_port = 8080
-  force_https = true 
+  internal_port = 3000
+  force_https = true
   auto_stop_machines = 'stop'
   auto_start_machines = true
-  min_machines_running = 1
+  min_machines_running = 0
   processes = ['app']
-
-[[services]]
-  protocol = "tcp"
-  internal_port = 1935
-  processes = ["app"]
-
-  [[services.ports]]
-    port = 1936
 
 [[vm]]
   memory = '1gb'
