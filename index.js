@@ -8,6 +8,20 @@ const config = {
     ping: 30,
     ping_timeout: 60
   },
+  rtmps: {
+    port: 1936,  // Standard RTMPS port
+    chunk_size: 60000,
+    gop_cache: true,
+    ping: 30,
+    ping_timeout: 60,
+    // The SSL certificates would be provided by Fly.io's proxy
+    // but the server needs to be configured to expect them
+    ssl: {
+      port: 1936,
+      key: process.env.SSL_KEY_PATH || '/etc/ssl/key.pem',
+      cert: process.env.SSL_CERT_PATH || '/etc/ssl/cert.pem'
+    }
+  },
   http: {
     port: 8080,
     allow_origin: '*',

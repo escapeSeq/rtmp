@@ -36,6 +36,14 @@ primary_region = 'arn'
   [[services.ports]]
     port = "1935"
 
+[[services]]
+  internal_port = 1936
+  protocol = "tcp"
+
+  [[services.ports]]
+    handlers = ["tls"]
+    port = "1936"
+
 [[vm]]
   memory = '1gb'
   cpu_kind = 'shared'
