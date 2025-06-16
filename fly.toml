@@ -22,7 +22,7 @@ primary_region = 'arn'
   processes = ["app"]
 
   [[services.ports]]
-    port = 1936
+    port = 1935
 
 [[vm]]
   memory = '1gb'
