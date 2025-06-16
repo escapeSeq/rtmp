@@ -1,11 +1,13 @@
 version: "3.8"
 
 services:
-  media-server:
+  rtmp:
     build: .
     ports:
-      - "1935:1935"   # RTMP ingest
-      - "8080:8080"   # HLS playback
+      - "1935:1935"    # RTMP
+      - "8080:8080"    # HTTP
     volumes:
-      - ./media:/app/media   # keeps HLS segments/playlist on host
+      - ./media:/app/media
+    environment:
+      - NODE_ENV=development
     restart: unless-stopped

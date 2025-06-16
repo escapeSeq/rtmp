@@ -1,12 +1,12 @@
 {
-  "name": "rtmp-hls-relay",
+  "name": "rtmp-server",
   "version": "1.0.0",
-  "description": "RTMP to HLS relay powered by Node-Media-Server",
+  "description": "RTMP Server using Node-Media-Server",
   "main": "index.js",
   "scripts": {
     "start": "node index.js"
   },
   "dependencies": {
-    "node-media-server": "^2.1.7"
+    "node-media-server": "^2.7.4"
   }
 } 
