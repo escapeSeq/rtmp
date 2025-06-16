@@ -6,18 +6,8 @@ const config = {
     chunk_size: 60000,
     gop_cache: true,
     ping: 30,
-    ping_timeout: 60
-  },
-  rtmps: {
-    port: 1936,  // Standard RTMPS port
-    chunk_size: 60000,
-    gop_cache: true,
-    ping: 30,
     ping_timeout: 60,
-    // The SSL certificates would be provided by Fly.io's proxy
-    // but the server needs to be configured to expect them
     ssl: {
-      port: 1936,
       key: process.env.SSL_KEY_PATH || '/etc/ssl/key.pem',
       cert: process.env.SSL_CERT_PATH || '/etc/ssl/cert.pem'
     }
@@ -25,35 +15,35 @@ const config = {
   http: {
     port: 8080,
     allow_origin: '*',
-    mediaroot: '/tmp/media',  // Using temporary directory instead of persistent volume
-    webroot: '/app/public',   // Serve a simple status page
-    api: true                 // Enable API for stream status
+    mediaroot: '/tmp/media',
+    webroot: '/app/public',
+    api: true
   },
   auth: {
-    api: false,               // Disable API authentication for now
-    play: false,             // No authentication for playing streams
-    publish: false           // No authentication for publishing streams
+    api: false,
+    play: false,
+    publish: false
   },
-  logType: 3                 // Enable debug logging
+  logType: 3
 };
 
 // Create server instance
 const nms = new NodeMediaServer(config);
 
 // Track active streams
-const activeStreams = new Set();
+const activeStreams = new Map();
 
 // Helper function to log stream details
 function logStreamDetails(prefix = '') {
-  console.log(`${prefix}Active streams:`, Array.from(activeStreams));
-  nms.getStreams().then(streams => {
-    console.log(`${prefix}Server streams:`, JSON.stringify(streams, null, 2));
-  }).catch(err => {
-    console.error(`${prefix}Error getting streams:`, err);
-  });
+  console.log(`${prefix}Active streams:`, Array.from(activeStreams.keys()));
+  if (activeStreams.size > 0) {
+    console.log('Stream details:');
+    activeStreams.forEach((value, key) => {
+      console.log(`- ${key}:`, value);
+    });
+  }
 }
 
-// Add event handlers for better error tracking
 nms.on('preConnect', (id, args) => {
   console.log('[NodeEvent on preConnect]', `id=${id} args=${JSON.stringify(args)}`);
   logStreamDetails('preConnect: ');
@@ -72,13 +62,23 @@ nms.on('doneConnect', (id, args) => {
 nms.on('prePublish', (id, StreamPath, args) => {
   console.log('[NodeEvent on prePublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
   console.log(`[Stream Info] New stream publishing attempt: ${StreamPath}`);
-  activeStreams.add(StreamPath);
+  activeStreams.set(StreamPath, {
+    id,
+    args,
+    startTime: new Date(),
+    type: 'publisher'
+  });
   logStreamDetails('prePublish: ');
 });
 
 nms.on('postPublish', (id, StreamPath, args) => {
   console.log('[NodeEvent on postPublish]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
   console.log(`[Stream Info] Stream successfully published: ${StreamPath}`);
+  if (activeStreams.has(StreamPath)) {
+    const streamInfo = activeStreams.get(StreamPath);
+    streamInfo.status = 'active';
+    activeStreams.set(StreamPath, streamInfo);
+  }
   logStreamDetails('postPublish: ');
 });
 
@@ -89,11 +89,16 @@ nms.on('donePublish', (id, StreamPath, args) => {
   logStreamDetails('donePublish: ');
 });
 
-// Add custom error handling for stream not found
 nms.on('prePlay', (id, StreamPath, args) => {
   console.log('[NodeEvent on prePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
   console.log(`[Stream Info] Play attempt for stream: ${StreamPath}`);
-  console.log(`[Stream Info] Stream exists in activeStreams: ${activeStreams.has(StreamPath)}`);
+  console.log(`[Stream Info] Stream exists: ${activeStreams.has(StreamPath)}`);
+  if (activeStreams.has(StreamPath)) {
+    const streamInfo = activeStreams.get(StreamPath);
+    if (!streamInfo.viewers) streamInfo.viewers = new Set();
+    streamInfo.viewers.add(id);
+    activeStreams.set(StreamPath, streamInfo);
+  }
   logStreamDetails('prePlay: ');
 });
 
@@ -101,6 +106,18 @@ nms.on('postPlay', (id, StreamPath, args) => {
   console.log('[NodeEvent on postPlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
   console.log(`[Stream Info] Stream playback started: ${StreamPath}`);
   logStreamDetails('postPlay: ');
+});
+
+nms.on('donePlay', (id, StreamPath, args) => {
+  console.log('[NodeEvent on donePlay]', `id=${id} StreamPath=${StreamPath} args=${JSON.stringify(args)}`);
+  if (activeStreams.has(StreamPath)) {
+    const streamInfo = activeStreams.get(StreamPath);
+    if (streamInfo.viewers) {
+      streamInfo.viewers.delete(id);
+      activeStreams.set(StreamPath, streamInfo);
+    }
+  }
+  logStreamDetails('donePlay: ');
 });
 
 // Start the server

@@ -22,12 +22,12 @@ primary_region = 'arn'
   protocol = "tcp"
 
 [[services]]
-  internal_port = 1935
+  internal_port = 1936
   protocol = "tcp"
 
   [[services.ports]]
     handlers = ["tls"]
-    port = "1935"
+    port = "1936"
 
 [[vm]]
   memory = '1gb'
