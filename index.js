@@ -11,7 +11,7 @@ const config = {
   http: {
     port: 8080,
     allow_origin: '*',
-    mediaroot: './media'         // must match the volume in docker-compose
+    mediaroot: '/tmp/media'  // Using temporary directory instead of persistent volume
   }
 };
 

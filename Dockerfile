@@ -20,9 +20,9 @@ RUN npm install
 # Copy the rest of your application code
 COPY . .
 
-# Create media directory and set permissions
-RUN mkdir -p media && \
-    chmod -R 777 media
+# Create temporary media directory
+RUN mkdir -p /tmp/media && \
+    chmod -R 777 /tmp/media
 
 # Expose ports
 EXPOSE 1935
